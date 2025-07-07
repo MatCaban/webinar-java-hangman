@@ -1,16 +1,11 @@
-import javax.swing.*;
-import java.sql.SQLOutput;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Random;
-import java.util.Scanner;
-// TODO: add case sensitiveness
-// TODO: don't count same incorrect guess more than one
+
+import java.util.*;
+
+
 // TODO: draw the actual hangman
-// TODO: restart game at the end
+
 // TODO: add colors somehow (very optional - you don't have to do this)
-// TODO: add information about how many guesses left (Enter a letter (...))
-// TODO: show incorrect guesses (letters which user already tried)
+
 
 public class Main {
     public static void main(String[] args) {
@@ -20,9 +15,13 @@ public class Main {
 
         String hiddenWord = generateHiddenWord(wordToGuess);
 
-        final int MAX_INCORRECT_GUESSES = 7;
+        final int MAX_INCORRECT_GUESSES = 6;
         int incorrectGuessesCounter = 0;
         List<Character> alreadyGuessed = new ArrayList<>();
+
+        String[][] hangman = createHangman();
+
+
 
         final Scanner scanner = new Scanner(System.in);
 
@@ -36,10 +35,12 @@ public class Main {
                 System.out.println("");
                 if (!hiddenWord.contains("_")) {
                     System.out.println("Congratulations, you guessed it: " + wordToGuess);
-                } else {System.out.println("Sorry, you have run out of guesses. It was " + wordToGuess);}
+                } else {
+                    System.out.println("Sorry, you have run out of guesses. It was " + wordToGuess);
+                }
 
 
-                if (!doUserWantToContinue(scanner)){
+                if (!doUserWantToContinue(scanner)) {
                     break;
                 } else {
                     System.out.println("=".repeat(30));
@@ -48,6 +49,7 @@ public class Main {
                     wordToGuess = selectRandomWord(random, words);
                     hiddenWord = generateHiddenWord(wordToGuess);
                     alreadyGuessed.clear();
+                    hangman = createHangman();
                 }
             }
 
@@ -56,17 +58,14 @@ public class Main {
             final char guess = scanLetter(scanner);
 
 
-            if (hiddenWord.contains(String.valueOf(guess))){
+            if (hiddenWord.contains(String.valueOf(guess))) {
                 System.out.println("This letter is already revealed");
-
-
-
-            } else if (wordToGuess.contains(String.valueOf(guess))){
+            } else if (wordToGuess.contains(String.valueOf(guess))) {
                 hiddenWord = revealLetters(wordToGuess, hiddenWord, guess);
                 System.out.println("Correct guess! Updated word: " + hiddenWord);
             } else if (alreadyGuessed.contains(guess)) {
                 System.out.println("You already try this letters");
-                for (char c: alreadyGuessed) {
+                for (char c : alreadyGuessed) {
                     System.out.print(c + " ");
                 }
                 System.out.println("");
@@ -75,7 +74,61 @@ public class Main {
                 alreadyGuessed.add(guess);
                 incorrectGuessesCounter++;
                 System.out.println("Incorrect guess, you have (" + (MAX_INCORRECT_GUESSES - incorrectGuessesCounter) + ") guesses left");
+                System.out.println("=".repeat(30));
+                updateHangman(hangman, incorrectGuessesCounter);
+                printHangman(hangman);
+                System.out.println("=".repeat(30));
             }
+        }
+    }
+
+    public static String[][] createHangman() {
+        String[][] hangman = new String[5][5];
+        for (String[] row : hangman) {
+            Arrays.fill(row, " ");
+        }
+
+        for (int i = 1; i < 4; i++) {
+            hangman[0][i] = "_";
+        }
+
+        for (int i = 1; i < hangman.length; i++) {
+            hangman[i][1] = "|";
+        }
+
+        for (int i = 0; i < hangman.length; i++) {
+            if (i == 1) {
+                continue;
+            }
+            hangman[4][i] = "_";
+        }
+
+
+        return hangman;
+
+
+
+
+    }
+
+    public static void printHangman(String[][] hangman) {
+        for (String[] row : hangman) {
+            for (String col : row) {
+                System.out.print(col);
+            }
+            System.out.println("");
+        }
+    }
+
+    public static void updateHangman(String[][] hangman, int incorrectGuesses) {
+        switch (incorrectGuesses) {
+            case 1 -> hangman[1][3] = "O";
+            case 2 -> hangman[2][3] = "|";
+            case 3 -> hangman[2][2] = "\\";
+            case 4 -> hangman[2][4] = "/";
+            case 5 -> hangman[3][2] = "/";
+            case 6 -> hangman[3][4] = "\\";
+
         }
     }
 
@@ -116,7 +169,7 @@ public class Main {
         final char[] hiddenWordChars = hiddenWord.toCharArray();
 
         for (int i = 0; i < word.length(); i++) {
-            if (word.charAt(i) == letter){
+            if (word.charAt(i) == letter) {
                 hiddenWordChars[i] = letter;
             }
         }
