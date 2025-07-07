@@ -1,6 +1,15 @@
 import java.sql.SQLOutput;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
+// TODO: add case sensitiveness
+// TODO: don't count same incorrect guess more than one
+// TODO: draw the actual hangman
+// TODO: restart game at the end
+// TODO: add colors somehow (very optional - you don't have to do this)
+// TODO: add information about how many guesses left (Enter a letter (...))
+// TODO: show incorrect guesses (letters which user already tried)
 
 public class Main {
     public static void main(String[] args) {
@@ -12,6 +21,7 @@ public class Main {
 
         final int MAX_INCORRECT_GUESSES = 6;
         int incorrectGuessesCounter = 0;
+        List<Character> alreadyGuessed = new ArrayList<>();
 
         final Scanner scanner = new Scanner(System.in);
 
@@ -29,15 +39,22 @@ public class Main {
             } else if (wordToGuess.contains(String.valueOf(guess))){
                 hiddenWord = revealLetters(wordToGuess, hiddenWord, guess);
                 System.out.println("Correct guess! Updated word: " + hiddenWord);
+            } else if (alreadyGuessed.contains(guess)) {
+                System.out.println("You already try this letter");
             } else {
+                alreadyGuessed.add(guess);
                 incorrectGuessesCounter++;
                 System.out.println("Incorrect guess, you have (" + (MAX_INCORRECT_GUESSES - incorrectGuessesCounter) + ") guesses left");
             }
         }
-
         if (!hiddenWord.contains("_")) {
-
+            System.out.println("");
+            System.out.println("Congratulations, you guessed it: " + wordToGuess);
+        } else {
+            System.out.println("");
+            System.out.println("Sorry, you have run out of guesses. It was " + wordToGuess);
         }
+
 
 
     }
@@ -48,7 +65,6 @@ public class Main {
         for (int i = 0; i < word.length(); i++) {
             if (word.charAt(i) == letter){
                 hiddenWordChars[i] = letter;
-                System.out.println(String.valueOf(hiddenWordChars));
             }
         }
         return String.valueOf(hiddenWordChars);
@@ -57,7 +73,7 @@ public class Main {
     public static char scanLetter(Scanner scanner) {
         while (true) {
             try {
-                final String line = scanner.nextLine();
+                final String line = scanner.nextLine().toLowerCase();
 
                 if (line.length() != 1) {
                     throw new Exception("Line length is not 1. Please enter a single letter");
