@@ -2,13 +2,16 @@
 import java.util.*;
 
 
-// TODO: draw the actual hangman
-
-// TODO: add colors somehow (very optional - you don't have to do this)
-
-
 public class Main {
+    public static final String ANSI_RESET = "\u001B[0m";
+    public static final String ANSI_YELLOW = "\u001B[33m";
+    public static final String ANSI_RED = "\u001B[31m";
+    public static final String ANSI_GREEN = "\u001B[32m";
+    public static final String ANSI_BLUE = "\u001B[34m";
+
+
     public static void main(String[] args) {
+
         final String[] words = {"java", "hangman", "skillmea", "academy", "computer"};
         final Random random = new Random();
         String wordToGuess = selectRandomWord(random, words);
@@ -34,9 +37,9 @@ public class Main {
             if (incorrectGuessesCounter == MAX_INCORRECT_GUESSES || !hiddenWord.contains("_")) {
                 System.out.println("");
                 if (!hiddenWord.contains("_")) {
-                    System.out.println("Congratulations, you guessed it: " + wordToGuess);
+                    System.out.println("Congratulations, you guessed it: " + ANSI_GREEN + wordToGuess + ANSI_RESET);
                 } else {
-                    System.out.println("Sorry, you have run out of guesses. It was " + wordToGuess);
+                    System.out.println("Sorry, you have run out of guesses. It was " + ANSI_RED +  wordToGuess + ANSI_RESET);
                 }
 
 
@@ -44,12 +47,14 @@ public class Main {
                     break;
                 } else {
                     System.out.println("=".repeat(30));
-                    System.out.println("Welcome to new game");
+
                     incorrectGuessesCounter = 0;
                     wordToGuess = selectRandomWord(random, words);
                     hiddenWord = generateHiddenWord(wordToGuess);
                     alreadyGuessed.clear();
                     hangman = createHangman();
+                    System.out.println("Welcome to new game");
+                    System.out.println("Guess the word: " + hiddenWord);
                 }
             }
 
@@ -59,24 +64,24 @@ public class Main {
 
 
             if (hiddenWord.contains(String.valueOf(guess))) {
-                System.out.println("This letter is already revealed");
+                System.out.println(ANSI_YELLOW +  "This letter is already revealed" + ANSI_RESET);
             } else if (wordToGuess.contains(String.valueOf(guess))) {
                 hiddenWord = revealLetters(wordToGuess, hiddenWord, guess);
-                System.out.println("Correct guess! Updated word: " + hiddenWord);
+                System.out.println(ANSI_GREEN +  "Correct guess!" + ANSI_RESET + " Updated word: " + hiddenWord);
             } else if (alreadyGuessed.contains(guess)) {
-                System.out.println("You already try this letters");
+                System.out.println(ANSI_YELLOW +  "You already try this letters" + ANSI_RESET);
                 for (char c : alreadyGuessed) {
-                    System.out.print(c + " ");
+                    System.out.print(ANSI_BLUE + c + ANSI_RESET + " ");
                 }
                 System.out.println("");
 
             } else {
                 alreadyGuessed.add(guess);
                 incorrectGuessesCounter++;
-                System.out.println("Incorrect guess, you have (" + (MAX_INCORRECT_GUESSES - incorrectGuessesCounter) + ") guesses left");
+                System.out.println("Incorrect guess, you have (" + ANSI_RED + (MAX_INCORRECT_GUESSES - incorrectGuessesCounter) + ANSI_RESET + ") guesses left");
                 System.out.println("=".repeat(30));
                 updateHangman(hangman, incorrectGuessesCounter);
-                printHangman(hangman);
+                printHangman(hangman, incorrectGuessesCounter);
                 System.out.println("=".repeat(30));
             }
         }
@@ -111,10 +116,12 @@ public class Main {
 
     }
 
-    public static void printHangman(String[][] hangman) {
+    public static void printHangman(String[][] hangman, int incorrectGuesses) {
         for (String[] row : hangman) {
             for (String col : row) {
-                System.out.print(col);
+                System.out.print(
+                        incorrectGuesses < 6 ? col : ANSI_RED + col + ANSI_RESET
+                );
             }
             System.out.println("");
         }
